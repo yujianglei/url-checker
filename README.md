@@ -1,4 +1,4 @@
-# Description
+# Introduction
 A tool provides health check for HTTP address in timing.
 
 # Configure
