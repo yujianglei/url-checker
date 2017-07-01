@@ -4,9 +4,10 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/UrlMonitorTool/cron"
-	"github.com/UrlMonitorTool/models"
-	_ "github.com/UrlMonitorTool/routers"
+	"url-checker/cron"
+	"url-checker/models"
+	_ "url-checker/routers"
+
 	"github.com/astaxie/beego"
 )
 

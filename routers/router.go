@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"github.com/UrlMonitorTool/controllers"
+	"url-checker/controllers"
 	"github.com/astaxie/beego"
 )
 

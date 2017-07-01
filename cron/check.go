@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/UrlMonitorTool/common"
-	"github.com/UrlMonitorTool/models"
+	"url-checker/common"
+	"url-checker/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
 	"github.com/toolkits/container/list"

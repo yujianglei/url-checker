@@ -12,7 +12,7 @@ type JsonResult struct {
 
 func WriteLogErr(err error) {
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 }
 

@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/UrlMonitorTool/common"
-	"github.com/UrlMonitorTool/models"
+	"url-checker/common"
+	"url-checker/models"
+
 	"github.com/astaxie/beego"
 )
 
@@ -17,14 +18,17 @@ type ItemController struct {
 }
 
 func (this *ItemController) ListItem() {
+	var null []interface{}
 
 	items, err := urlitem.FindAllItem()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err.Error())
 		result.Code = 1
 		result.Message = err.Error()
+		result.Data = null
 	} else {
 		result.Code = 0
+		result.Message = ""
 		result.Data = items
 	}
 	this.Data["json"] = result
@@ -33,19 +37,21 @@ func (this *ItemController) ListItem() {
 }
 
 func (this *ItemController) ListItemById() {
-
+	var null interface{}
 	id, err := this.GetInt64(":id")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err.Error())
 	}
 
 	item, err := urlitem.FindOneItem(id)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 		result.Code = 1
 		result.Message = err.Error()
+		result.Data = null
 	} else {
 		result.Code = 0
+		result.Message = ""
 		result.Data = item
 	}
 	this.Data["json"] = result
@@ -57,7 +63,7 @@ func (this *ItemController) AddItem() {
 	json.Unmarshal(this.Ctx.Input.RequestBody, &urlitem)
 
 	if err := urlitem.AddItem(&urlitem); err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 		result.Code = 1
 		result.Message = err.Error()
 	} else {
