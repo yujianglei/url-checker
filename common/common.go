@@ -1,6 +1,8 @@
 package common
 
-import "log"
+import (
+	"log"
+)
 
 type JsonResult struct {
 	Code    int         `json:"code"`

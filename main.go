@@ -16,10 +16,13 @@ func prepare() {
 }
 
 func init() {
+	cron.Init()
 	models.InitSQL()
-	go cron.StartCheck()
+
 }
 
 func main() {
+	go cron.Startsave()
+	go cron.StartCheck()
 	beego.Run()
 }

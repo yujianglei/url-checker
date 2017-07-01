@@ -1,7 +1,7 @@
 package cron
 
 import (
-	"fmt"
+	"crypto/tls"
 	"log"
 	"strconv"
 	"time"
@@ -10,12 +10,21 @@ import (
 	"github.com/UrlMonitorTool/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/httplib"
+	"github.com/toolkits/container/list"
 )
+
+var CheckResultQueue *list.SafeLinkedList
+var WorkerChan chan int
+
+func Init() {
+	WorkerChan = make(chan int, 2)
+	CheckResultQueue = list.NewSafeLinkedList()
+}
 
 type CheckResult struct {
 	ID           int64  `json:"id"`
 	InstanceName string `json:"instance_name"`
-	Address      string `json:"address"`
+	Item         string `json:"item"`
 	RespCode     string `json:"resp_code"`
 	RespTime     int64  `json:"resp_time"`
 	PushTime     int64  `json:"push_time"`
@@ -36,31 +45,41 @@ func StartCheck() {
 		common.WriteLogErr(err)
 
 		for _, item := range items {
-			log.Fatal(item)
-			go checkresultStatus(item)
+			WorkerChan <- 1
+			go Check(item)
 		}
 		<-t1.C
 	}
 }
 
-func checkresultStatus(item *models.UrlItem) (checkResult *CheckResult) {
-	log.Fatal(item)
+func Check(item *models.UrlItem) {
+	defer func() {
+		<-WorkerChan
+	}()
+
+	checkdata := doCheck(item)
+	// fmt.Println(checkdata.Address, checkdata.RespCode, checkdata.RespTime)
+	CheckResultQueue.PushFront(checkdata)
+
+}
+
+func doCheck(item *models.UrlItem) (checkResult *CheckResult) {
 	checkResult = &CheckResult{
 		InstanceName: item.InstanceName,
-		Address:      item.Address,
+		Item:         item.Item,
 		RespCode:     "0",
 	}
-	log.Fatal(checkResult)
+
 	reqStartTime := time.Now()
-	req := httplib.Get(item.Address)
-	// req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	req := httplib.Get(item.Item)
+	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	req.SetTimeout(3*time.Second, 10*time.Second)
 	req.Header("Content-Type", "application/x-www-form-urlencoded; param=value")
 
 	resp, err := req.Response()
 	checkResult.PushTime = time.Now().Unix()
 	if err != nil {
-		log.Fatal("[ERROR]:", item.Address, err.Error())
+		log.Println("[ERROR]:", item.Item, err.Error())
 		checkResult.Status = common.Failure
 		return
 	}
@@ -72,11 +91,10 @@ func checkresultStatus(item *models.UrlItem) (checkResult *CheckResult) {
 	respDucatime := int64(time.Now().Sub(reqStartTime).Nanoseconds() / 1000000)
 	checkResult.RespTime = respDucatime
 
-	if respDucatime > item.Timeout {
+	if respDucatime > (item.Timeout * 1000) {
 		checkResult.Status = common.Failure
 		return
 	}
 	checkResult.Status = common.Success
-	fmt.Println(checkResult)
 	return
 }

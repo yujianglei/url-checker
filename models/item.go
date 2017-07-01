@@ -9,19 +9,22 @@ import (
 type UrlItem struct {
 	Id           int64
 	InstanceName string
-	Address      string
-	Type         string
-	Protocol     string
+	Item         string
+	UrlType      string
 	Timeout      int64
 	Keyword      string
-	Frequency    int64
-	Option       string
+	Maintainer   string
+}
+
+func (u *UrlItem) TableName() string {
+	return "instance_url_items"
 }
 
 func (this *UrlItem) FindAllItem() ([]*UrlItem, error) {
 	var items []*UrlItem
 	o := orm.NewOrm()
-	_, err := o.QueryTable("url_item").OrderBy("-id").All(&items)
+	table := this.TableName()
+	_, err := o.QueryTable(table).OrderBy("-id").All(&items)
 	return items, err
 }
 
